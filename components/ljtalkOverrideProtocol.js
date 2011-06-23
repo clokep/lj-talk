@@ -36,36 +36,24 @@
  * ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://app/modules/jsProtoHelper.jsm");
+Components.utils.import("resource:///modules/jsProtoHelper.jsm");
 const Ci = Components.interfaces;
 
-function UsernameSplit(aBase, aDefaultValue)
-{
+function UsernameSplit(aBase, aDefaultValue) {
   this.base = aBase;
   this.defaultValue = aDefaultValue;
 }
 UsernameSplit.prototype = {
-  QueryInterface: XPCOMUtils.generateQI([Ci.purpleIUsernameSplit,
-                                         Ci.nsIClassInfo]),
-  getInterfaces: function(countRef) {
-    var interfaces = [Ci.nsIClassInfo, Ci.nsISupports, Ci.purpleIUsernameSplit];
-    countRef.value = interfaces.length;
-    return interfaces;
-  },
-  getHelperForLanguage: function(language) null,
-  contractID: null,
-  classDescription: "Username Split object",
-  classID: null,
-  implementationLanguage: Ci.nsIProgrammingLanguage.JAVASCRIPT,
-  flags: Ci.nsIClassInfo.DOM_OBJECT,
+  __proto__: ClassInfo("purpleIUsernameSplit", "username split object"),
 
   get reverse() this.base.reverse,
   get separator() this.base.separator,
   get label() this.base.label
-}
+};
 
 function ljtalkProtocol() { }
 ljtalkProtocol.prototype = {
+  __proto__: ForwardProtocolPrototype,
   get normalizedName() "ljtalk",
   get name() "LJ Talk",
   get iconBaseURI() "chrome://prpl-ljtalk/skin/",
@@ -86,6 +74,5 @@ ljtalkProtocol.prototype = {
 
   classID: Components.ID("{88f1f395-3ebd-4357-afa6-78e7a17715b4}")
 };
-ljtalkProtocol.prototype.__proto__ = ForwardProtocolPrototype;
 
-var NSGetModule = XPCOMUtils.generateNSGetModule([ljtalkProtocol]);
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([ljtalkProtocol]);

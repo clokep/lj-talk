@@ -1,1 +1,5 @@
 skin		prpl-ljtalk		classic/1.0					chrome/skin/
+
+component {88f1f395-3ebd-4357-afa6-78e7a17715b4} components/ljtalkOverrideProtocol.js
+contract @instantbird.org/purple/ljtalk;1 {88f1f395-3ebd-4357-afa6-78e7a17715b4}
+category js-protocol-plugin @instantbird.org/purple/ljtalk;1 @instantbird.org/purple/ljtalk;1
