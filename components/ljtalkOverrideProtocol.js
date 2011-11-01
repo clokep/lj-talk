@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/jsProtoHelper.jsm");
-const Ci = Components.interfaces;
+const {interfaces: Ci, utils: Cu} = Components;
+Cu.import("resource:///modules/imXPCOMUtils.jsm");
+Cu.import("resource:///modules/jsProtoHelper.jsm");
 
 function UsernameSplit(aBase, aDefaultValue) {
   this.base = aBase;
