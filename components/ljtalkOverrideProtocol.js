@@ -37,9 +37,21 @@
  * ***** END LICENSE BLOCK ***** */
 
 const {interfaces: Ci, utils: Cu} = Components;
+
+// Import the module that contains some XPCOM helper utilities.
 Cu.import("resource:///modules/imXPCOMUtils.jsm");
+// Import the module that contains protocol helper utilities.
 Cu.import("resource:///modules/jsProtoHelper.jsm");
 
+
+// A utility function used to make getUsersplit shorter and nicer.
+function getIter(aEnumerator) {
+  while (aEnumerator.hasMoreElements())
+    yield aEnumerator.getNext();
+}
+
+// This is a base username split object and just represents fields necessary to
+// connect an account. See http://lxr.instantbird.org/instantbird/source/chat/components/public/prplIProtocol.idl#125
 function UsernameSplit(aBase, aDefaultValue) {
   this.base = aBase;
   this.defaultValue = aDefaultValue;
@@ -55,16 +67,30 @@ UsernameSplit.prototype = {
 function ljtalkProtocol() { }
 ljtalkProtocol.prototype = {
   __proto__: ForwardProtocolPrototype,
+  
+  // This should match the second half of the category in the chrome.manifest
+  // file (e.g. prpl-ljtalk).
   get normalizedName() "ljtalk",
+  // The display name (in the account manager, etc.).
   get name() "LJ Talk",
+  // This chrome URL should be registered as a skin in chrome.manifest, it needs
+  // to contain three images that are the icons of the protocol: icon.png
+  // (16x16), icon32.png (32x32) and icon48.png (48x48).
   get iconBaseURI() "chrome://prpl-ljtalk/skin/",
+  // The protocol to inherit everything not specified.
   get baseId() "prpl-jabber",
 
+  // Username splits are the fields display when making a new account. This
+  // example overrides the default server of XMPP (gtalk.com) with the
+  // livejournal.com server.
   getUsernameSplit: function() {
-    var splits = this.base.getUsernameSplit();
+    let splits = this.base.getUsernameSplit();
     let newSplits = [];
     while (splits.hasMoreElements()) {
       let split = splits.getNext();
+      
+      // Override only the default server, but pass through any other field
+      // unchanged.
       if (split.defaultValue != "gmail.com")
         newSplits.push(split);
       else
@@ -72,7 +98,10 @@ ljtalkProtocol.prototype = {
     }
     return new nsSimpleEnumerator(newSplits);
   },
-
+  
+  // A UUID, you can ask instantbot in #instantbird on moznet to generate one
+  // for you (by asking "instantbot: uuid"). This needs to match the component
+  // IDs in your chrome.manifest.
   classID: Components.ID("{88f1f395-3ebd-4357-afa6-78e7a17715b4}")
 };
 
