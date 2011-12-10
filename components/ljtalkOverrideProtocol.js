@@ -11,16 +11,14 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is the Instantbird messenging client, released
- * 2009.
+ * The Original Code is LJ Talk.
  *
  * The Initial Developer of the Original Code is
- * Florian QUEZE <florian@instantbird.org>.
- * Portions created by the Initial Developer are Copyright (C) 2009
+ * Patrick Cloke <clokep@gmail.com>.
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Patrick Cloke <clokep@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,35 +36,36 @@
 
 const {interfaces: Ci, utils: Cu} = Components;
 
-// Import the module that contains some XPCOM helper utilities.
 Cu.import("resource:///modules/imXPCOMUtils.jsm");
-// Import the module that contains protocol helper utilities.
 Cu.import("resource:///modules/jsProtoHelper.jsm");
+Cu.import("resource:///modules/xmpp.jsm");
+Cu.import("resource:///modules/xmpp-session.jsm");
 
-
-// A utility function used to make getUsersplit shorter and nicer.
-function getIter(aEnumerator) {
-  while (aEnumerator.hasMoreElements())
-    yield aEnumerator.getNext();
+function LJTalkAccount(aProtoInstance, aImAccount) {
+  this._init(aProtoInstance, aImAccount);
 }
+LJTalkAccount.prototype = {
+  __proto__: XMPPAccountPrototype,
+  get canJoinChat() false,
+  connect: function() {
+    // New accounts will give just a username, but old accounts (from libpurple
+    // XMPP will have the full JID).
+    if (this.name.indexOf("@") == -1)
+      this._jid = this._parseJID(this.name + "@livejournal.com/instantbird");
+    else
+      this._jid = this._parseJID(this.name);
+      
+    Cu.reportError(JSON.stringify(this._jid));
 
-// This is a base username split object and just represents fields necessary to
-// connect an account. See http://lxr.instantbird.org/instantbird/source/chat/components/public/prplIProtocol.idl#125
-function UsernameSplit(aBase, aDefaultValue) {
-  this.base = aBase;
-  this.defaultValue = aDefaultValue;
-}
-UsernameSplit.prototype = {
-  __proto__: ClassInfo("purpleIUsernameSplit", "username split object"),
-
-  get reverse() this.base.reverse,
-  get separator() this.base.separator,
-  get label() this.base.label
+    this._connection = new XMPPSession("livejournal.com", 5222,
+                                       "none", this._jid,
+                                       this.imAccount.password, this);
+  }
 };
 
 function ljtalkProtocol() { }
 ljtalkProtocol.prototype = {
-  __proto__: ForwardProtocolPrototype,
+  __proto__: GenericProtocolPrototype,
   
   // This should match the second half of the category in the chrome.manifest
   // file (e.g. prpl-ljtalk).
@@ -77,26 +76,11 @@ ljtalkProtocol.prototype = {
   // to contain three images that are the icons of the protocol: icon.png
   // (16x16), icon32.png (32x32) and icon48.png (48x48).
   get iconBaseURI() "chrome://prpl-ljtalk/skin/",
-  // The protocol to inherit everything not specified.
-  get baseId() "prpl-jabber",
 
-  // Username splits are the fields display when making a new account. This
-  // example overrides the default server of XMPP (gtalk.com) with the
-  // livejournal.com server.
-  getUsernameSplit: function() {
-    let splits = this.base.getUsernameSplit();
-    let newSplits = [];
-    while (splits.hasMoreElements()) {
-      let split = splits.getNext();
-      
-      // Override only the default server, but pass through any other field
-      // unchanged.
-      if (split.defaultValue != "gmail.com")
-        newSplits.push(split);
-      else
-        newSplits.push(new UsernameSplit(split, "livejournal.com"));
-    }
-    return new nsSimpleEnumerator(newSplits);
+  getAccount: function(aImAccount) new LJTalkAccount(this, aImAccount),
+  
+  options: {
+    resource: {get label() _("options.resource"), default: "instantbird"}
   },
   
   // A UUID, you can ask instantbot in #instantbird on moznet to generate one
