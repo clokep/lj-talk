@@ -3,7 +3,7 @@ skin		prpl-ljtalk		classic/1.0					chrome/skin/
 
 # Register the component in Mozilla using the UUID and the relative path to the
 # file.
-component {88f1f395-3ebd-4357-afa6-78e7a17715b4} components/ljtalkOverrideProtocol.js
+component {88f1f395-3ebd-4357-afa6-78e7a17715b4} ljtalk.js
 # Register the contract for the component, use your UUID and the normalized
 # name.
 contract @instantbird.org/purple/ljtalk;1 {88f1f395-3ebd-4357-afa6-78e7a17715b4}
