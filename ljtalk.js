@@ -41,6 +41,10 @@ Cu.import("resource:///modules/jsProtoHelper.jsm");
 Cu.import("resource:///modules/xmpp.jsm");
 Cu.import("resource:///modules/xmpp-session.jsm");
 
+XPCOMUtils.defineLazyGetter(this, "_", function()
+  l10nHelper("chrome://purple/locale/xmpp.properties")
+);
+
 function LJTalkAccount(aProtoInstance, aImAccount) {
   this._init(aProtoInstance, aImAccount);
 }
@@ -55,10 +59,9 @@ LJTalkAccount.prototype = {
     else
       this._jid = this._parseJID(this.name);
       
-    Cu.reportError(JSON.stringify(this._jid));
 
     this._connection = new XMPPSession("livejournal.com", 5222,
-                                       "none", this._jid,
+                                       "require_tls", this._jid,
                                        this.imAccount.password, this);
   }
 };
