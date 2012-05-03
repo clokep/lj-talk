@@ -1,7 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * This Source Code is subject to the terms of the Mozilla Public License
- * version 2.0 (the "License"). You can obtain a copy of the License at
- * http://mozilla.org/MPL/2.0/.
+ * The XMPP LJ Talk protocol, see http://www.livejournal.com/chat/ for
+ * connection details.
  */
 
 const {interfaces: Ci, utils: Cu} = Components;
@@ -11,9 +14,15 @@ Cu.import("resource:///modules/jsProtoHelper.jsm");
 Cu.import("resource:///modules/xmpp.jsm");
 Cu.import("resource:///modules/xmpp-session.jsm");
 
+initLogModule("ljtalk", this);
+
 XPCOMUtils.defineLazyGetter(this, "_", function()
   l10nHelper("chrome://purple/locale/xmpp.properties")
 );
+
+//const HOST = "xmpp.service.livejournal.com";
+const HOST = "livejournal.com";
+const PORT = 5222;
 
 function LJTalkAccount(aProtoInstance, aImAccount) {
   this._init(aProtoInstance, aImAccount);
@@ -25,12 +34,11 @@ LJTalkAccount.prototype = {
     // New accounts will give just a username, but old accounts (from libpurple
     // XMPP will have the full JID).
     if (this.name.indexOf("@") == -1)
-      this._jid = this._parseJID(this.name + "@livejournal.com/instantbird");
+      this._jid = this._parseJID(this.name + "@livejournal.com");
     else
       this._jid = this._parseJID(this.name);
 
-
-    this._connection = new XMPPSession("livejournal.com", 5222,
+    this._connection = new XMPPSession(HOST, PORT,
                                        "require_tls", this._jid,
                                        this.imAccount.password, this);
   }
